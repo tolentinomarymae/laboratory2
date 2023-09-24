@@ -13,7 +13,7 @@ class MainModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id', 'music', 'playlist'];
+    protected $allowedFields    = ['id', 'musictitle', 'playlist'];
 
     // Dates
     protected $useTimestamps = false;
