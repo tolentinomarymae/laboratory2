@@ -5,6 +5,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
+$routes->get('/', 'Home::index');
 $routes->get('/musicplayer', 'MainController::index');
 $routes->post('upload_song', 'MainController::upload_song');
 $routes->post('/create_playlist', 'MainController::create_playlist');

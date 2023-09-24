@@ -237,26 +237,28 @@
     </div>
   </div>
     <h1>Music Player</h1>
-    
-
     <audio id="audio" controls autoplay></audio>
-    <ul id="playlist"> 
-      <?php if ($song):?>
+<ul id="playlist">
+  <?php if ($song): ?>
     <?php foreach ($music as $m): ?>
-        <li data-src="<?= base_url($music['playlist']); ?>"><?= $music['musictitle']; ?>
+      <li data-src="<?= base_url($m['playlist']); ?>"><?= $m['musictitle']; ?>
         <button class="addToPlaylist" data-song-id="<?= $m['id']; ?>" data-toggle="modal" data-target="#addToPlaylistModal">
-            +
-        </button></li>
-    <?php endforeach;?>
-    <?php else: ?>
-      <?php foreach ($music as $m): ?>
-        <li data-src="<?= base_url($m['playlist']); ?>"><?= $m['musictitle']; ?>
+          +
+        </button>
+      </li>
+    <?php endforeach; ?>
+  <?php else: ?>
+    <?php foreach ($music as $m): ?>
+      <li data-src="<?= base_url($m['playlist']); ?>"><?= $m['musictitle']; ?>
         <button class="addToPlaylist" data-song-id="<?= $m['id']; ?>" data-toggle="modal" data-target="#addToPlaylistModal">
-            +
-        </button></li>
-    <?php endforeach;?>
-    <?php endif;?>
-    </ul>
+          +
+        </button>
+      </li>
+    <?php endforeach; ?>
+  <?php endif; ?>
+</ul>
+
+    
     <div class="modal" id="myModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -289,12 +291,6 @@
         </div>
       </div>
     </div>
-    <div id="search-results-container">
-    <ul id="playlist">
-      <h1>fsdf</h1>
-        <!-- Existing content goes here -->
-    </ul>
-</div>
     <script>
       
     $(document).ready(function () {
@@ -319,49 +315,21 @@
       modal.css("display", "none");
     }
   });
-});
-    /*$(document).ready(function () {
-    // Get references to the playlist items
-    const playlistItems = document.querySelectorAll('#playlist li');
-
-    function playTrack(trackIndex) {
-        if (trackIndex >= 0 && trackIndex < playlistItems.length) {
-            const track = playlistItems[trackIndex];
-            const trackSrc = track.getAttribute('data-src');
-            const audio = new Audio(trackSrc);
-            audio.play();
-        }
-    }
-
-    // Add a click event listener to each playlist item to play the selected song
-    playlistItems.forEach((item, index) => {
-        item.addEventListener('click', () => {
-            playTrack(index);
-        });
-    });
-});
-*/
-        const audio = document.getElementById('audio');
+});const audio = document.getElementById('audio');
         const playlist = document.getElementById('playlist');
         const playlistItems = playlist.querySelectorAll('li');
 
         let currentTrack = 0;
         
         function playTrack(trackIndex) {
-        if (trackIndex >= 0 && trackIndex < playlistItems.length) {
-            const track = playlistItems[trackIndex];
-            const trackSrc = track.getAttribute('data-src');
-            const audio = new Audio(trackSrc);
-            audio.play();
+            if (trackIndex >= 0 && trackIndex < playlistItems.length) {
+                const track = playlistItems[trackIndex];
+                const trackSrc = track.getAttribute('data-src');
+                audio.src = trackSrc;
+                audio.play();
+                currentTrack = trackIndex;
+            }
         }
-    }
-
-    // Add a click event listener to each playlist item to play the selected song
-    playlistItems.forEach((item, index) => {
-        item.addEventListener('click', () => {
-            playTrack(index);
-        });
-    });
 
         function nextTrack() {
             currentTrack = (currentTrack + 1) % playlistItems.length;
@@ -384,7 +352,8 @@
         });
 
         playTrack(currentTrack);
-       
+// Play the first track by default
+playTrack(currentTrack);
     $(document).ready(function () {
         // Get references to the button and modal
         const modal = $("#addToPlaylistModal");
