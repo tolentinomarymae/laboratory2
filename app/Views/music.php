@@ -102,18 +102,27 @@
         </li>
         <li class="nav-item">
         <button type="button" class="myplaylist" data-bs-toggle="modal" data-bs-target="#createPlaylistModal">
-  Add New Playlist
+  Add Playlist
 </button>
         
         </li>
+        <!-- Add this button to your navbar -->
+        <button type="button" class="myplaylist" id="myPlaylistButton" data-bs-toggle="modal" data-bs-target="#myPlaylistModal">
+    My Playlist
+</button>
+
+</li>
+
       </ul>
-      <form action="/" method="get">
+      
+      <form action="/search" method="get">
     <input type="search" name="search" class="searchbar" placeholder="search song">
     <button type="submit" class="btn btn-primary">search</button>
   </form>
     </div>
   </div>
 </nav>
+
 <div class="modal fade" id="addToPlaylistModal" tabindex="-1" aria-labelledby="addToPlaylistModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -126,7 +135,7 @@
                 
             </div>
             <div class="modal-body">
-                <form action="/add-to-playlist" method="post">
+                <form action="/addToPlaylist" method="post">
                     <input type="hidden" id="songId" name="song_id">
                     <div class="form-group">
                         <label for="playlistSelect">Select a Playlist:</label>
@@ -170,6 +179,37 @@
 </div>
 <!--end of add new playlist-->
 
+<!-- Modal to display playlists -->
+<div class="modal fade" id="myPlaylistModal" tabindex="-1" aria-labelledby="myPlaylistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myPlaylistModalLabel">My Playlists</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Playlist Name</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($playlists as $playlist): ?>
+                            <tr>
+                                <td><?= $playlist['playlist']; ?></td>
+                                
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
   <div class="modal fade" id="addsongmodal" tabindex="-1" aria-labelledby="addsongmodal" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -201,12 +241,21 @@
 
     <audio id="audio" controls autoplay></audio>
     <ul id="playlist"> 
+      <?php if ($song):?>
     <?php foreach ($music as $m): ?>
-        <li data-src="<?= base_url($m['playlist']); ?>"><?= $m['musictitle']; ?>
-        <button class="add-to-playlist" data-song-id="<?= $m['id']; ?>" data-toggle="modal" data-target="#addToPlaylistModal">
+        <li data-src="<?= base_url($music['playlist']); ?>"><?= $music['musictitle']; ?>
+        <button class="addToPlaylist" data-song-id="<?= $m['id']; ?>" data-toggle="modal" data-target="#addToPlaylistModal">
             +
         </button></li>
     <?php endforeach;?>
+    <?php else: ?>
+      <?php foreach ($music as $m): ?>
+        <li data-src="<?= base_url($m['playlist']); ?>"><?= $m['musictitle']; ?>
+        <button class="addToPlaylist" data-song-id="<?= $m['id']; ?>" data-toggle="modal" data-target="#addToPlaylistModal">
+            +
+        </button></li>
+    <?php endforeach;?>
+    <?php endif;?>
     </ul>
     <div class="modal" id="myModal">
       <div class="modal-dialog">
@@ -240,7 +289,14 @@
         </div>
       </div>
     </div>
+    <div id="search-results-container">
+    <ul id="playlist">
+      <h1>fsdf</h1>
+        <!-- Existing content goes here -->
+    </ul>
+</div>
     <script>
+      
     $(document).ready(function () {
   // Get references to the button and modal
   const modal = $("#myModal");
@@ -264,8 +320,27 @@
     }
   });
 });
-    </script>
-    <script>
+    /*$(document).ready(function () {
+    // Get references to the playlist items
+    const playlistItems = document.querySelectorAll('#playlist li');
+
+    function playTrack(trackIndex) {
+        if (trackIndex >= 0 && trackIndex < playlistItems.length) {
+            const track = playlistItems[trackIndex];
+            const trackSrc = track.getAttribute('data-src');
+            const audio = new Audio(trackSrc);
+            audio.play();
+        }
+    }
+
+    // Add a click event listener to each playlist item to play the selected song
+    playlistItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            playTrack(index);
+        });
+    });
+});
+*/
         const audio = document.getElementById('audio');
         const playlist = document.getElementById('playlist');
         const playlistItems = playlist.querySelectorAll('li');
@@ -273,14 +348,20 @@
         let currentTrack = 0;
         
         function playTrack(trackIndex) {
-            if (trackIndex >= 0 && trackIndex < playlistItems.length) {
-                const track = playlistItems[trackIndex];
-                const trackSrc = track.getAttribute('data-src');
-                audio.src = trackSrc;
-                audio.play();
-                currentTrack = trackIndex;
-            }
+        if (trackIndex >= 0 && trackIndex < playlistItems.length) {
+            const track = playlistItems[trackIndex];
+            const trackSrc = track.getAttribute('data-src');
+            const audio = new Audio(trackSrc);
+            audio.play();
         }
+    }
+
+    // Add a click event listener to each playlist item to play the selected song
+    playlistItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            playTrack(index);
+        });
+    });
 
         function nextTrack() {
             currentTrack = (currentTrack + 1) % playlistItems.length;
@@ -307,7 +388,7 @@
     $(document).ready(function () {
         // Get references to the button and modal
         const modal = $("#addToPlaylistModal");
-        const addToPlaylistButtons = $(".add-to-playlist");
+        const addToPlaylistButtons = $(".addToPlaylist");
 
         // Function to open the modal with the specified data
         function openModalWithData(dataId) {
@@ -334,7 +415,7 @@
         // Get references to the button and modal
         const addToPlaylistModal = $("#addToPlaylistModal");
         const createPlaylistModal = $("#createPlaylistModal");
-        const addToPlaylistButtons = $(".add-to-playlist");
+        const addToPlaylistButtons = $(".addToPlaylist");
 
         // Function to open the "Add to Playlist" modal with the specified data
         function openAddToPlaylistModal(dataId) {
@@ -369,7 +450,53 @@
             $("#playlistName").val("");
         });
     });
+// Function to open "My Playlist" modal
+function openMyPlaylistModal() {
+    $("#myPlaylistModal").modal("show");
+}
 
+// Function to add a song to a playlist (you can customize this)
+function addToPlaylist(playlistId) {
+    // Implement the logic to add the current song to the selected playlist
+    const songId = $("#songId").val();
+    
+    // You can make an AJAX request here to add the song to the playlist in the backend
+    // For simplicity, I'm just displaying an alert message
+    alert(`Added song with ID ${songId} to playlist with ID ${playlistId}`);
+    
+    // Close the modal
+    $("#myPlaylistModal").modal("hide");
+}
+
+$(document).ready(function () {
+    // Add click event listener to open "My Playlist" modal
+    $("#myPlaylistButton").click(function () {
+        openMyPlaylistModal();
+    });
+});
+
+    $(document).ready(function () {
+        // Handle form submission
+        $('#search-form').on('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+            const searchQuery = $('#search-input').val();
+
+            // Use AJAX to send the search query to the server
+            $.ajax({
+                url: '/search', // Replace with the actual URL for searching
+                method: 'GET',
+                data: { search: searchQuery },
+                success: function (data) {
+                    // Update the content with the search results
+                    $('#search-results-container').html(data);
+                },
+                error: function () {
+                    // Handle errors if needed
+                    console.error('Error occurred during search.');
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>

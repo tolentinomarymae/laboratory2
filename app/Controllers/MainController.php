@@ -9,6 +9,7 @@ use App\Models\MainModel as ModelsMainModel;
 
 class MainController extends BaseController
 {
+    
     public function index()
     {
         $main = new MainModel();
@@ -28,7 +29,6 @@ class MainController extends BaseController
             // Generate a unique filename for the uploaded song
             $songFilename = uniqid() . '.mp3';
             // Define the full path for the uploaded song file
-            $songFilePath = $uploadDir . $songFilename;
 
             // Move the uploaded file to the defined directory
             if ($this->request->getFile('song_file')->move($uploadDir, $songFilename)) {
@@ -38,8 +38,7 @@ class MainController extends BaseController
                 // Save $songTitle and $songFilePath to your database table
                 $mainModel = new MainModel();
                 $data = [
-                    'musictitle' => $songTitle,
-                    'playlist' => $songFilePath, // Assuming you want to store the file path
+                    'musictitle' => $songTitle
                 ];
                 $mainModel->insert($data);
 
@@ -54,6 +53,22 @@ class MainController extends BaseController
             return redirect()->to('/musicplayer')->with('error', 'No valid file uploaded.');
         }
     }
+    // Function to add a song to a playlist (you can customize this)
+/*function addToPlaylist(playlistId) {
+    // Implement the logic to add the current song to the selected playlist
+    const songId = $("#songId").val();
+    
+    // Update the data-src attribute of the selected <li> element
+    const playlistItem = $(`li[data-src="${songId}"]`);
+    playlistItem.attr('data-src', `/path/to/updated/audio/file.mp3`);
+    
+    // Call playTrack() to play the updated song
+    playTrack(currentTrack);
+    
+    // Close the modal
+    $("#myPlaylistModal").modal("hide");
+}*/
+
     public function addToPlaylist()
 {
     $songId = $this->request->getPost('song_id');
@@ -73,19 +88,24 @@ class MainController extends BaseController
 
     return redirect()->to('/musicplayer')->with('success', 'Song added to the playlist.');
 }
-// MainController.php
-
 public function create_playlist()
 {
     $playlistName = $this->request->getPost('playlist_name');
 
-    // Insert the new playlist into the database
+    // Check if a playlist with the same name already exists
     $playlistModel = new PlaylistModel();
+    $existingPlaylist = $playlistModel->where('playlist', $playlistName)->first();
+
+    if ($existingPlaylist) {
+        return redirect()->back()->withInput()->with('error', 'Playlist with this name already exists.');
+    }
+
+    // Insert the new playlist into the database
     $data = [
         'id' => null,
-        'playlist' => $playlistName,
+        'playlist' => $playlistName
     ];
-    
+
     try {
         $playlistModel->insert($data);
         return redirect()->to('/musicplayer')->with('success', 'Playlist created successfully.');
@@ -95,4 +115,12 @@ public function create_playlist()
     }
 }
 
+public function search(){
+    $searchQuery = $this->request->getVar('search');
+    if ($searchQuery){
+        $main = new MainModel();
+        $data['song'] = $main->like('musictitle', $searchQuery)->findAll();
+    }
+    return view ('music', $data);
+}
 }
